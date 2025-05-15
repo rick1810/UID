@@ -1,6 +1,12 @@
 # UID
 
-Generate unique identifiers
+Generate unique identifiers.<br/>
+<br/>
+I just did not like the UUID standard,<br/>
+so I made my own Unique Identifier.<br/>
+<br/>
+By adding the __version__ at the beggining instead of between the __time__,<br/>
+The UID does not require to be the same length for all it's versions.<br/>
 <br/>
 <br/>
 
@@ -40,7 +46,4 @@ Stringified as a 40 length hex separated by `-`<br/>
 | _version_ | _time_ | _key_ |
 | :---: | :---: | :---: |
 | 01 | 0196D421177D | 9D7E5978E35A9B26D6CDED51 |
-
-*Version*: `1`<br/>
-*Time*: `1747315660669`<br/>
-*Key*: `9D7E5978E35A9B26D6CDED51`<br/>
+| 1 | 1747315660669 | 9D7E5978E35A9B26D6CDED51 |
