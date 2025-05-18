@@ -2,6 +2,7 @@ package com.dutch_computer_technology.UID;
 
 import java.security.SecureRandom;
 import java.util.HexFormat;
+import java.util.Objects;
 
 /**
  * Generate a new UID or from a String
@@ -44,33 +45,30 @@ public class UID {
 	 */
 	private void generate(int version) throws IllegalArgumentException {
 		
-		switch(version) {
+		HexFormat hex = HexFormat.of().withUpperCase();
+		StringBuilder uid = new StringBuilder();
+		
+		if (version == 1) {
 			
-			case 1:
-				
-				this.version = 1;
-				this.time = System.currentTimeMillis();
-				this.key = new byte[12];
-				ran.nextBytes(this.key);
-				
-				HexFormat hex = HexFormat.of().withUpperCase();
-				StringBuilder uid = new StringBuilder();
-				uid.append(hex.toHexDigits(this.version, 2));
-				uid.append("-");
-				uid.append(hex.toHexDigits( (int)((this.time >> 32) & 0xFFFF) , 4));
-				uid.append(hex.toHexDigits( (int)((this.time >> 16) & 0xFFFF) , 4));
-				uid.append(hex.toHexDigits( (int)(this.time & 0xFFFF) , 4));
-				uid.append("-");
-				uid.append(hex.formatHex(this.key));
-				
-				this.uid = uid.toString();
-				
-				break;
-				
-			default:
-				throw new IllegalArgumentException("Invalid UID version");
+			this.version = 1;
+			this.time = System.currentTimeMillis();
+			this.key = new byte[12];
+			ran.nextBytes(this.key);
+			
+			uid.append(hex.toHexDigits(this.version, 2));
+			uid.append("-");
+			uid.append(hex.toHexDigits( (int)((this.time >> 32) & 0xFFFF) , 4));
+			uid.append(hex.toHexDigits( (int)((this.time >> 16) & 0xFFFF) , 4));
+			uid.append(hex.toHexDigits( (int)(this.time & 0xFFFF) , 4));
+			uid.append("-");
+			uid.append(hex.formatHex(this.key));
+			
+			this.uid = uid.toString();
+			return;
 			
 		};
+		
+		throw new IllegalArgumentException("Invalid UID version");
 		
 	};
 	
@@ -95,43 +93,39 @@ public class UID {
 			
 		};
 		
-		switch(this.version) {
+		HexFormat hex = HexFormat.of().withUpperCase();
+		
+		if (this.version == 1) {
 			
-			case 1:
+			if (uid.length() != 40) throw new IllegalArgumentException("Invalid UID size");
+			
+			try {
 				
-				if (uid.length() != 40) throw new IllegalArgumentException("Invalid UID size");
+				long high = HexFormat.fromHexDigits(uid.substring(3, 7));
+				long mid = HexFormat.fromHexDigits(uid.substring(7, 11));
+				long low = HexFormat.fromHexDigits(uid.substring(11, 15));
+				this.time = (high << 32) | (mid << 16) | low;
 				
-				try {
-					
-					long high = HexFormat.fromHexDigits(uid.substring(3, 7));
-					long mid = HexFormat.fromHexDigits(uid.substring(7, 11));
-					long low = HexFormat.fromHexDigits(uid.substring(11, 15));
-					this.time = (high << 32) | (mid << 16) | low;
-					
-				} catch(IllegalArgumentException e) {
-					
-					throw new IllegalArgumentException("Invalid UID time", e);
-					
-				};
+			} catch(IllegalArgumentException e) {
 				
-				HexFormat hex = HexFormat.of().withUpperCase();
+				throw new IllegalArgumentException("Invalid UID time", e);
 				
-				try {
-					
-					this.key = hex.parseHex(uid.substring(16));
-					
-				} catch(IllegalArgumentException e) {
-					
-					throw new IllegalArgumentException("Invalid UID key", e);
-					
-				};
+			};
+			
+			try {
 				
-				break;
+				this.key = hex.parseHex(uid.substring(16));
 				
-			default:
-				throw new IllegalArgumentException("Invalid UID version");
+			} catch(IllegalArgumentException e) {
+				
+				throw new IllegalArgumentException("Invalid UID key", e);
+				
+			};
+			return;
 			
 		};
+		
+		throw new IllegalArgumentException("Invalid UID version");
 		
 	};
 	
@@ -180,6 +174,13 @@ public class UID {
 		
 		if (obj == null) return false;
 		return obj.toString().equals(this.toString());
+		
+	};
+	
+	@Override
+	public int hashCode() {
+		
+		return Objects.hash(this.toString());
 		
 	};
 	
